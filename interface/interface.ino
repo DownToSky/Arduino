@@ -1,6 +1,7 @@
 #include <Elegoo_GFX.h>
 #include <Elegoo_TFTLCD.h>
 #include <TouchScreen.h>
+#include <TimeLib.h>
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -53,8 +54,18 @@ void setup() {
   
   }
   tft.begin(identifier);
-  tft.drawRoundRect(10,10,50,50,10,GREEN);
 }
 
 void loop() {
+  time_t t = now();
+  tft.setCursor(180+60/2,240+10+60/2);
+  tft.setTextColor(WHITE);  
+  tft.setTextSize(4);
+  tft.println(hour(t));
+  
+  tft.drawRoundRect(0,0+10,240,240,10,GREEN);
+  tft.drawRoundRect(0,240+10,60,60,10,GREEN);
+  tft.drawRoundRect(60,240+10,60,60,10,GREEN);
+  tft.drawRoundRect(120,240+10,60,60,10,GREEN);
+  tft.drawRoundRect(180,240+10,60,60,10,GREEN);
 }
