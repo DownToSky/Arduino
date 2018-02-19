@@ -869,6 +869,7 @@ void Elegoo_TFTLCD::setRotation(uint8_t x) {
   }}
 
 #ifdef read8isFunctionalized
+  #undef read8
   #define read8(x) x=read8fn()
 #endif
 
