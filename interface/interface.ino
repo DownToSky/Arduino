@@ -2,6 +2,8 @@
 #include <Elegoo_TFTLCD.h>
 #include <TouchScreen.h>
 #include <TimeLib.h>
+#include <stdint.h>
+#include "TouchScreen.h"
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -19,7 +21,28 @@
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
+#define YP A2  // must be an analog pin, use "An" notation!
+#define XM A3  // must be an analog pin, use "An" notation!
+#define YM 8   // can be a digital pin
+#define XP 9   // can be a digital pin
+
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
+
+class Button{
+  public:
+  short x1, x2, y1, y2;
+  void (*macro)();
+};
+
+void Button::set_coord(int new_x1, new_x2, int new_y1, int new_y2) {
+  x1 = new_x1;
+  x2 = new_x2;
+  y1 = new_y1;
+  y2 = new_y2;
+}
+
+void Button::set_macro(void (*new_macro)()
 
 void setup() {
   Serial.begin(9600);
@@ -54,31 +77,10 @@ void setup() {
   
   }
   tft.begin(identifier);
-  tft.drawRoundRect(0,0+10,240,240,10,GREEN);
-  tft.drawRoundRect(0,240+10,60,60,10,GREEN);
-  tft.drawRoundRect(60,240+10,60,60,10,GREEN);
-  tft.drawRoundRect(120,240+10,60,60,10,GREEN);
-  tft.drawRoundRect(180,240+10,60,60,10,GREEN);
+  tft.drawRoundRect(0,0,240,320,10,GREEN);
   delay(1600);
-  tft.fillScreen(BLACK);
 }
 
-uint32_t counter = 0;
-void loop() {
 
-   // Delete the privious time recorded
-  if(counter != 0)
-  {
-    tft.setTextColor(BLACK);
-  tft.setTextSize(1);
-  tft.setCursor(180,240+10+60/2);
-    tft.println(counter-1);
-  }
-  
-  tft.setTextColor(WHITE);
-  tft.setTextSize(1);
-  tft.setCursor(180,240+10+60/2);
-  tft.println(counter);
-  counter=counter+1;
-  delay(1000);
+void loop() {
 }
