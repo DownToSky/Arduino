@@ -1,7 +1,6 @@
 #include <Elegoo_GFX.h>
 #include <Elegoo_TFTLCD.h>
 #include <TouchScreen.h>
-#include <TimeLib.h>
 #include <stdint.h>
 #include "TouchScreen.h"
 
@@ -31,18 +30,30 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 class Button{
   public:
+  Elegoo_TFTLCD* tft;
   short x1, x2, y1, y2;
   void (*macro)();
+  void set_macro(void (*new_macro)());
+  void set_coord(short new_x1, short new_x2, short new_y1, short new_y2);
+  Button(short new_x1, short new_x2, short new_y1, short new_y2, Elegoo_TFTLCD* new_tft);
 };
 
-void Button::set_coord(int new_x1, new_x2, int new_y1, int new_y2) {
+Button::Button(short new_x1, short new_x2, short new_y1, short new_y2, Elegoo_TFTLCD* new_tft){
+ tft = new_tft;
+ set_coord(new_x1, new_x2, new_y1, new_y2);
+}
+
+void Button::set_coord(short new_x1, short new_x2, short new_y1, short new_y2) {
   x1 = new_x1;
   x2 = new_x2;
   y1 = new_y1;
   y2 = new_y2;
+ tft->fillRect(x1, y1, abs(x2-x1), abs(y2-y1), RED);
 }
 
-void Button::set_macro(void (*new_macro)()
+void Button::set_macro(void (*new_macro)()){
+  macro = new_macro;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -77,7 +88,7 @@ void setup() {
   
   }
   tft.begin(identifier);
-  tft.drawRoundRect(0,0,240,320,10,GREEN);
+  Button b1(10,10,100,100,&tft);
   delay(1600);
 }
 
