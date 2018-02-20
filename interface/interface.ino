@@ -2,7 +2,6 @@
 #include <Elegoo_TFTLCD.h>
 #include <TouchScreen.h>
 #include <stdint.h>
-#include "TouchScreen.h"
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -25,9 +24,20 @@
 #define YM 8   // can be a digital pin
 #define XP 9   // can be a digital pin
 
+//Touch For New ILI9341 TP
+#define TS_MINX 120
+#define TS_MAXX 900
+
+#define TS_MINY 70
+#define TS_MAXY 920
+// We have a status line for like, is FONA working
+#define STATUS_X 10
+#define STATUS_Y 65
+
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
-
+Elegoo_GFX_Button button;
+/*
 class Button{
   public:
   Elegoo_TFTLCD* tft;
@@ -41,6 +51,7 @@ class Button{
 Button::Button(short new_x1, short new_x2, short new_y1, short new_y2, Elegoo_TFTLCD* new_tft){
  tft = new_tft;
  set_coord(new_x1, new_x2, new_y1, new_y2);
+ Serial.println("hi");
 }
 
 void Button::set_coord(short new_x1, short new_x2, short new_y1, short new_y2) {
@@ -50,10 +61,9 @@ void Button::set_coord(short new_x1, short new_x2, short new_y1, short new_y2) {
   y2 = new_y2;
  tft->fillRect(x1, y1, abs(x2-x1), abs(y2-y1), RED);
 }
-
 void Button::set_macro(void (*new_macro)()){
   macro = new_macro;
-}
+}*/
 
 void setup() {
   Serial.begin(9600);
@@ -88,10 +98,41 @@ void setup() {
   
   }
   tft.begin(identifier);
-  Button b1(10,10,100,100,&tft);
-  delay(1600);
+  tft.setRotation(1);
+  tft.fillScreen(BLACK);
+  button.initButton(&tft,320/2,240/2,100,100,RED,GREEN,BLUE,(char*)"",1);
+  button.drawButton();
 }
 
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
+
+boolean state = false;
 
 void loop() {
+  digitalWrite(13, HIGH);
+  TSPoint p = ts.getPoint();
+  digitalWrite(13, LOW);
+  pinMode(XM, OUTPUT);
+  pinMode(YP, OUTPUT);
+  if (p.z > MINPRESSURE && p.z < MAXPRESSURE) {
+    p.x = map(p.x, TS_MINX, TS_MAXX, tft.width(), 0);
+    p.y = (tft.height()-map(p.y, TS_MINY, TS_MAXY, tft.height(), 0));
+    if(button.contains(p.x, p.y))
+      if(state == false)
+      {
+        button.drawButton(true);
+        state = true;
+      }
+   }
+   else
+      if(state == true)
+      {
+        
+        button.drawButton();
+        state = false;
+      }
+  Serial.print(state);
+  Serial.print("\n");
+  delay(100);
 }
