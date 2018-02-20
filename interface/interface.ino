@@ -2,6 +2,7 @@
 #include <Elegoo_TFTLCD.h>
 #include <TouchScreen.h>
 #include <stdint.h>
+#include <Keyboard.h>
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -102,37 +103,43 @@ void setup() {
   tft.fillScreen(BLACK);
   button.initButton(&tft,320/2,240/2,100,100,RED,GREEN,BLUE,(char*)"",1);
   button.drawButton();
+  Keyboard.begin();
 }
 
 #define MINPRESSURE 10
 #define MAXPRESSURE 1000
-
+#define PRESSURE_TOLERANCE 100
+short pressure_counter = 0;
 boolean state = false;
 
 void loop() {
-  digitalWrite(13, HIGH);
+  //digitalWrite(13, HIGH);
   TSPoint p = ts.getPoint();
-  digitalWrite(13, LOW);
+  //digitalWrite(13, LOW);
   pinMode(XM, OUTPUT);
   pinMode(YP, OUTPUT);
   if (p.z > MINPRESSURE && p.z < MAXPRESSURE) {
     p.x = map(p.x, TS_MINX, TS_MAXX, tft.width(), 0);
     p.y = (tft.height()-map(p.y, TS_MINY, TS_MAXY, tft.height(), 0));
     if(button.contains(p.x, p.y))
+    {
+      pressure_counter = 0;
       if(state == false)
       {
+        Keyboard.write('g');
         button.drawButton(true);
         state = true;
       }
+    }
    }
    else
-      if(state == true)
+      if(state == true && pressure_counter >=PRESSURE_TOLERANCE)
       {
-        
+        pressure_counter = 0;
         button.drawButton();
         state = false;
+      }else
+      {
+        pressure_counter++;
       }
-  Serial.print(state);
-  Serial.print("\n");
-  delay(100);
 }
